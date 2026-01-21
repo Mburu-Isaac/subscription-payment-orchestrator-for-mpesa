@@ -65,11 +65,11 @@ class Transaction(db.Model):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
 
-with app.app_context():
-    db.create_all()
+# with app.app_context():
+#     db.create_all()
 
 # transaction = Mpesa()
-# transaction.token_cache()
+# print(transaction.token_cache())
 # print(transaction.stk_push())
 
 
