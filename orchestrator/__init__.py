@@ -9,5 +9,8 @@ def create_app():
     db.init_app(app)
 
     from orchestrator import models
+    from orchestrator.routes import bp
+
+    app.register_blueprint(bp)
 
     return app
