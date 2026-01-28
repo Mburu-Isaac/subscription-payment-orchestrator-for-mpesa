@@ -1,6 +1,4 @@
-from orchestrator.extensions import db
 from orchestrator import create_app
-from mpesa import Mpesa
 
 app = create_app()
 
@@ -11,9 +9,6 @@ app = create_app()
 if __name__ == "__main__":
     app.run(debug=True)
 
-# transaction = Mpesa()
-# print(transaction.token_cache())
-# print(transaction.stk_push())
 
 
 

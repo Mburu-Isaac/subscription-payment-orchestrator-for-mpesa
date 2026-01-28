@@ -55,10 +55,10 @@ class Mpesa:
     def stk_push(self):
         """triggers an STK Push to mpesa"""
 
-        business_short_code = 174379
+        business_short_code = "174379"
         timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
         encode_bytes = base64.b64encode(
-            f'{business_short_code} + {timestamp} + {os.getenv("EXPRESS_PASSKEY")}'.encode("utf-8")
+            f'{business_short_code}{os.getenv("EXPRESS_PASSKEY")}{timestamp}'.encode("utf-8")
         )
         password = encode_bytes.decode("utf-8")
 
@@ -77,9 +77,10 @@ class Mpesa:
                 "PartyA":254743277086,
                 "PartyB":business_short_code,
                 "PhoneNumber":254743277087,
-                "CallBackUrl":"",
-                "AccountReference":"accountref"
+                "CallBackURL":"https://eab04853f0a0.ngrok-free.app/transactions/stk-callback",
+                "AccountReference":"accountref",
+                "TransactionDesc":"SubscriptionPayment"
             }
         )
 
-        return response.json()
+        return response.json()["CustomerMessage"]
