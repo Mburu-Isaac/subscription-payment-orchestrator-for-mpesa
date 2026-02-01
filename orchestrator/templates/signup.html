@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sign Up</title>
+</head>
+<body>
+<div class="form-group">
+   <form content="{{ url_for('user.signup') }}" method="post">
+    <label for="contact">mpesa number:</label>
+    <input type="text" placeholder="mpesa number" name="mpesa_number">
+    <label for="username">username:</label>
+    <input type="text" placeholder="username" name="username">
+    <label for="email">email:</label>
+    <input type="email" placeholder="email" name="email">
+    <label for="password">password:</label>
+    <input type="text" placeholder="password" name="password">
+    <button type="submit">
+      Sign up
+    </button>
+  </form>
+</div>
+</body>
+</html>

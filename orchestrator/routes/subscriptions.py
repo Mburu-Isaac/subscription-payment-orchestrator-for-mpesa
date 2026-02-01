@@ -23,3 +23,11 @@ def update_subscription():
 @bp.route("/delete")
 def delete_subscription():
     return "Route deletes subscriptions"
+
+# try:
+    # db operations
+# except Exception:
+    #db.rollback()
+    #raise
+
+

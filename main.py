@@ -1,4 +1,5 @@
 from orchestrator import create_app
+from orchestrator.extensions import db
 
 app = create_app()
 
