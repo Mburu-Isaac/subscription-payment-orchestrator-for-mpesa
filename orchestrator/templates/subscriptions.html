@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Subscriptions</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+
+  <form class="subscription-form">
+    <h2>{{ current_user.user_name }}'s Subscriptions</h2>
+    <ul class="subscription-list">
+      {% for subscription in subscriptions %}
+        <li><a href="{{ url_for('subscription.read_subscription', subscription_id=subscription.id) }}">{{ subscription.service_name }}</a></li>
+      {% endfor %}
+    </ul>
+  </form>
+
+</body>
+</html>

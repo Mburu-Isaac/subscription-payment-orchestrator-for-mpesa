@@ -1,0 +1,258 @@
+/* Form container styling */
+form {
+  max-width: 450px;          /* Keeps the form reasonably sized */
+  margin: 40px auto;         /* Centers the form on the page */
+  padding: 25px 30px;        /* Inner spacing */
+  border: 1px solid #ccc;    /* Subtle border */
+  border-radius: 10px;       /* Rounded corners */
+  background-color: #fdfdfd; /* Light background */
+  font-family: Arial, sans-serif;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05); /* Slight shadow for depth */
+}
+
+/* Headings (if you add an <h2> inside form) */
+form h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Labels stacked vertically */
+label {
+  display: block;
+  margin-top: 15px;
+  font-weight: 500;
+  color: #555;
+}
+
+/* Input, select, and number/date fields styling */
+input, select {
+  width: 100%;               /* Full width */
+  padding: 10px 12px;        /* Comfortable padding */
+  margin-top: 5px;           /* Space between label and input */
+  margin-bottom: 10px;       /* Space before next element */
+  border: 1px solid #aaa;    /* Border color */
+  border-radius: 6px;        /* Rounded corners */
+  font-size: 15px;
+  box-sizing: border-box;    /* Ensures padding doesn’t break width */
+  transition: border-color 0.2s, box-shadow 0.2s; /* Smooth focus */
+}
+
+/* Focus effect for inputs */
+input:focus, select:focus {
+  outline: none;
+  border-color: #4CAF50;              /* Green border */
+  box-shadow: 0 0 5px rgba(76, 175, 80, 0.4);
+}
+
+/* Button styling */
+button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+/* Button hover effect */
+button:hover {
+  background-color: #45a049;
+  transform: scale(1.02);
+}
+
+/* Optional: smaller text for placeholders */
+input::placeholder {
+  color: #aaa;
+  font-style: italic;
+}
+
+/* Signup form container */
+.form-group form {
+  max-width: 420px;
+  margin: 60px auto;
+  padding: 25px 30px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background-color: #fdfdfd;
+  font-family: Arial, sans-serif;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Labels */
+.form-group label {
+  display: block;
+  margin-top: 15px;
+  font-weight: 500;
+  color: #555;
+  text-transform: lowercase;
+}
+
+/* Inputs */
+.form-group input {
+  width: 100%;
+  padding: 10px 12px;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  border: 1px solid #aaa;
+  border-radius: 6px;
+  font-size: 15px;
+  box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+/* Input focus */
+.form-group input:focus {
+  outline: none;
+  border-color: #4CAF50;
+  box-shadow: 0 0 5px rgba(76, 175, 80, 0.4);
+}
+
+/* Placeholder styling */
+.form-group input::placeholder {
+  color: #aaa;
+  font-style: italic;
+}
+
+/* Submit button */
+.form-group button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 20px;
+  background-color: #4CAF50;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+/* Button hover */
+.form-group button:hover {
+  background-color: #45a049;
+  transform: scale(1.02);
+}
+
+/* Card wrapper (same feel as form) */
+.detail-card {
+  max-width: 500px;
+  margin: 50px auto;
+  padding: 25px 30px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background-color: #fdfdfd;
+  font-family: Arial, sans-serif;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+/* Title */
+.detail-card h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+  font-weight: 600;
+}
+
+/* Detail table */
+.detail-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* Left column (field names) */
+.detail-table th {
+  text-align: left;
+  padding: 10px 12px;
+  width: 45%;
+  font-weight: 600;
+  color: #555;
+  background-color: #f9f9f9;
+  border-bottom: 1px solid #eee;
+}
+
+/* Right column (values) */
+.detail-table td {
+  padding: 10px 12px;
+  color: #333;
+  border-bottom: 1px solid #eee;
+}
+
+/* Action buttons */
+.detail-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+/* Shared button style */
+.btn {
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  line-height: 1;
+}
+
+/* Edit button */
+.btn.edit {
+  background-color: #4CAF50;
+  color: white;
+}
+
+/* Delete link styled like a link */
+.btn.delete {
+  background: none;
+  color: #e53935; /* red for delete */
+  text-decoration: underline;
+  padding: 0;
+}
+
+/* Action container */
+.detail-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+* Form title */
+.subscription-form h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-weight: 600;
+  color: #4CAF50;
+}
+
+/* Subscription list */
+.subscription-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.subscription-list li {
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  border-radius: 5px;
+  background-color: #f1f1f1;
+  transition: background-color 0.2s;
+}
+
+.subscription-list li:hover {
+  background-color: #e0e0e0;
+}
+

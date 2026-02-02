@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Subscriptions</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+
+</head>
+<body>
+  <form content="{{ url_for('subscription.update_subscription' if subscription else 'subscription.create_subscription', subscription_id=subscription.id) }}" method="post">
+    <h2>{{"Update Subscription" if subscription else "Subscription Service"}}</h2>
+    <label for="service-name">service name:</label>
+    <input
+            type="text"
+            id="service-name"
+            name="service_name"
+            placeholder="Gym subscription"
+            value="{{ subscription.service_name if subscription else '' }}"
+            required
+    >
+
+    <label for="payment-type">payment type:</label>
+    <select id="payment-type" name="payment_type" required>
+      {% set options = ["Paybill", "Till Number"] %} <!-- get it to say "Till Number -->
+      {% for option in options %}
+      <option value="{{ option }}"
+              {% if subscription and subscription.payment_type == option %}
+                selected
+              {% endif %}
+      >
+        {{ option }}
+        {% endfor %}
+      </option>
+<!--      <option value="paybill">Paybill</option>-->
+<!--      <option value="till_number">Till Number</option>-->
+    </select>
+
+    <label for="till-number">till number:</label>
+    <input type="text"
+           id="till-number"
+           name="till_number"
+           placeholder="1234567"
+           value="{{ subscription.till_number if subscription else '' }}"
+    >
+
+    <label for="paybill-number">paybill number:</label>
+    <input type="text"
+           id="paybill-number"
+           name="paybill_number"
+           placeholder="522522"
+           value="{{ subscription.paybill_number if subscription else '' }}"
+    >
+
+    <label for="acc-number">acc number:</label>
+    <input type="text"
+           id="acc-number"
+           name="account_number"
+           placeholder="12345ABC"
+           value="{{ account_number if subscription else '' }}"
+    >
+
+    <label for="amount">amount: </label>
+    <input type="number"
+           id="amount"
+           name="amount"
+           placeholder="service cost"
+           step="0.01"
+           min="100"
+           value="{{ subscription.amount if subscription else '' }}"
+           required
+    >
+
+    <label for="frequency">Frequency: </label>
+    <select id="frequency" name="frequency" required>
+      {% set options = ["Monthly", "Annually"] %}
+      {% for option in options %}
+      <option value="{{ option }}"
+              {% if subscription and subscription.frequency == option%}selected{% endif %}
+      >
+        {{ option }}
+        {% endfor %}
+      </option>
+<!--      <option value="annually">Annually</option>-->
+    </select>
+
+    <label for="next-payment">Next Payment: </label>
+    <input type="date"
+           id="next-payment"
+           name="next_payment_date"
+           value="{{ subscription.next_payment_date.strftime('%Y-%m-%d') if subscription else '' }}"
+           required
+    >
+
+    <button type="submit">{{"Update" if subscription else "Create Subscription"}}</button>
+  </form>
+  <a href="{{ url_for('user.logout') }}">Log out</a>
+</body>
+</html>

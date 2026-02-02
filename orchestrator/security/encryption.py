@@ -11,3 +11,9 @@ def encrypt_contact(phone_number: str) -> bytes:
 
 def decrypt_contact(encrypted_number: bytes) -> str:
     return fernet.decrypt(encrypted_number).decode()
+
+def encrypt_acc_number(acc_number: str) -> bytes:
+    return fernet.encrypt(acc_number.encode())
+
+def decrypt_acc_number(encrypted_acc: bytes) -> str:
+    return fernet.decrypt(encrypted_acc).decode()

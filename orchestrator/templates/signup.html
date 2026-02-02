@@ -3,18 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <title>Sign Up</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
 <div class="form-group">
    <form content="{{ url_for('user.signup') }}" method="post">
+    <h2>SignUp</h2>
     <label for="contact">mpesa number:</label>
-    <input type="text" placeholder="mpesa number" name="mpesa_number">
+    <input type="text" id="contact" placeholder="mpesa number" name="mpesa_number" required>
     <label for="username">username:</label>
-    <input type="text" placeholder="username" name="username">
+    <input type="text" id="username" placeholder="username" name="username" required>
     <label for="email">email:</label>
-    <input type="email" placeholder="email" name="email">
+    <input type="email" id="email" placeholder="email" name="email" required>
     <label for="password">password:</label>
-    <input type="text" placeholder="password" name="password">
+    <input type="text" id="password" placeholder="password" name="password" required>
     <button type="submit">
       Sign up
     </button>
