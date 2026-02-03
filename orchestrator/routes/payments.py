@@ -1,18 +1,49 @@
 # handle payment functions
-# catch mpesa CallBackUrl
 # add to transaction table
 
 from flask import Blueprint,request,jsonify
 from orchestrator.services import Mpesa
-from orchestrator.models import Transaction
+from orchestrator.models import Transaction, Subscription
 from orchestrator.extensions import db
 from pprint import pprint
+from orchestrator.security.encryption import decrypt_contact, decrypt_acc_number
+from orchestrator.utilities.canonicalize import standardize_contact
 
 bp = Blueprint("payment", __name__)
-mpesa = Mpesa()
 
-@bp.route("/make-payment")
-def make_payment():
+@bp.route("/make-payment/<int:subscription_id>")
+def make_payment(subscription_id):
+    subscription = db.session.get(Subscription, subscription_id)
+
+    mpesa_contact = int(
+        standardize_contact(
+            decrypt_contact(
+                subscription.user.mpesa_number
+            )
+        )
+    )
+
+    transaction_type = ""
+    business_short_code = 0
+
+    if subscription.payment_type == "Till Number":
+        business_short_code = int(subscription.till_number) # "174379"
+        transaction_type = "CustomerBuyGoodsOnline"
+    elif subscription.payment_type == "Paybill": # check if C2B allows payments to banks using paybill
+        transaction_type = "CustomerPaybillOnline"
+        # assess making payments to banks
+        pass
+        # account reference = decrypt_acc_number(subscription.account_number)
+
+    mpesa = Mpesa(
+        mpesa_contact=mpesa_contact,
+        transaction_type=transaction_type,
+        business_short_code=business_short_code,
+        amount=int(subscription.amount),
+        account_ref=subscription.service_name,
+        transaction_desc=f"{subscription.frequency} subscription for your {subscription.service_name}"
+    )
+
     mpesa.token_cache()
     return mpesa.stk_push()
 
@@ -51,3 +82,7 @@ def stk_callback():
 @bp.route("/view-transactions")
 def view_transactions():
     pass
+
+
+
+# make payment - do when implementing automation mechanism

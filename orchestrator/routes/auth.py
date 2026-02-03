@@ -19,7 +19,8 @@ def signup():
             mpesa_number=encrypt_contact(request.form.get("mpesa_number")),
             user_name=request.form.get("username"),
             email=hash_email(request.form.get("email")),
-            password=ph.hash(request.form.get("password"))
+            password=ph.hash(request.form.get("password"))      # compare emails during sign up
+                                                                   # if user exists, send "email already exists"
         )
         try:
             db.session.add(user)
@@ -37,6 +38,9 @@ def signup():
 def login():
 
     if request.method == "POST":
+
+        # if email does not exist in the database
+        # handle error - notify user email does not exist
 
         user_object = db.session.execute(
             db.select(User).where(
@@ -68,6 +72,7 @@ def login():
                                                                         # list of what users can do subscriptions|transactions|profile
         except VerifyMismatchError:
             flash("Invalid Password - return to login page", "danger")
+            # redirect user to login page if password is wrong - flash message
 
     return render_template("login.html")
 

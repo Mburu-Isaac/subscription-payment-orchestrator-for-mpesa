@@ -9,19 +9,34 @@ load_dotenv()
 
 class Mpesa:
 
-    def __init__(self):
+    def __init__(
+            self,
+            mpesa_contact,
+            transaction_type,
+            business_short_code,
+            amount,
+            account_ref,
+            transaction_desc
+    ):
         self.consumer_key = os.getenv("CONSUMER_KEY")
         self.consumer_secret = os.getenv("CONSUMER_SECRET")
         self.access_token = ""
         self.expires_at = 0
+        self.mpesa_contact = mpesa_contact
+        self.transaction_type = transaction_type   # if paybill:
+                                                       # transaction_type == "CustomerPayBillOnline"
+                                                    # else:
+                                                        # other option given by daraja - matching "till number"
+        self.business_short_code = business_short_code  # check if C2B works
+        self.amount = amount
+        self.account_ref = account_ref
+        self.transaction_desc = transaction_desc
 
     def get_access_token(self):
         """sends a get request to Daraja
         updates the access token's expiry time
         returns the access token"""
 
-        #Debug: Catch and handle the error if anything else but the access_token is returned
-        #catch and handle error if Daraja cannot be reached
         try:
             response = requests.get(
                 url="https://sandbox.safaricom.co.ke/oauth/v1/generate",
@@ -53,34 +68,55 @@ class Mpesa:
             return self.get_access_token()
 
     def stk_push(self):
-        """triggers an STK Push to mpesa"""
+        """
+            triggers an STK Push to mpesa,
+            returns status message
+            redirects callback url to designed route
+        """
 
-        business_short_code = "174379"
         timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
         encode_bytes = base64.b64encode(
-            f'{business_short_code}{os.getenv("EXPRESS_PASSKEY")}{timestamp}'.encode("utf-8")
+            f'{self.business_short_code}{os.getenv("EXPRESS_PASSKEY")}{timestamp}'.encode("utf-8")
         )
         password = encode_bytes.decode("utf-8")
 
-        response = requests.post(
-            url="https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest",
-            headers={
-                "Authorization":f"Bearer {self.access_token}",
-                "Content-Type":"application/json"
-            },
-            json={
-                "BusinessShortCode":business_short_code,
-                "Password":password,
-                "Timestamp": timestamp,
-                "TransactionType":"CustomerPayBillOnline",
-                "Amount":1,
-                "PartyA":254743277086,
-                "PartyB":business_short_code,
-                "PhoneNumber":254743277087,
-                "CallBackURL":"https://eab04853f0a0.ngrok-free.app/transactions/stk-callback",
-                "AccountReference":"accountref",
-                "TransactionDesc":"SubscriptionPayment"
-            }
-        )
+        # test whether pipeline works - print the json; don't send the post request.
+        json={
+            "BusinessShortCode":self.business_short_code, # get short code from the database
+            "Password":password,
+            "Timestamp": timestamp,
+            "TransactionType":self.transaction_type, # specify transaction type from the database
+            "Amount":self.amount, # get amount from the database
+            "PartyA":self.mpesa_contact, # add contact from database
+            "PartyB":self.business_short_code,
+            "PhoneNumber":self.mpesa_contact,
+            "CallBackURL":"https://eab04853f0a0.ngrok-free.app/transactions/stk-callback",
+            "AccountReference":self.account_ref, # add mechanism to add account number if transaction
+                                                                             # != CustomerPayBillOnline
+            "TransactionDesc":self.transaction_desc
+        }
+        return json
 
-        return response.json()["CustomerMessage"]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        # response = requests.post(
+        #     url="https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest",
+        #     headers={
+        #         "Authorization":f"Bearer {self.access_token}",
+        #         "Content-Type":"application/json"
+        #     },
+
+        # return response.json()["CustomerMessage"] # message to display when payment is pending
