@@ -23,23 +23,22 @@ def make_payment(subscription_id):
         )
     )
 
-    transaction_type = ""
-    business_short_code = 0
-
-    if subscription.payment_type == "Till Number":
-        business_short_code = int(subscription.till_number) # "174379"
-        transaction_type = "CustomerBuyGoodsOnline"
-    elif subscription.payment_type == "Paybill": # check if C2B allows payments to banks using paybill
-        transaction_type = "CustomerPaybillOnline"
-        # assess making payments to banks
-        pass
-        # account reference = decrypt_acc_number(subscription.account_number)
+    # transaction_type = ""
+    # business_short_code = 0
+    #
+    # if subscription.payment_type == "Till Number":
+    #     business_short_code = int(subscription.till_number) # "174379"
+    #     transaction_type = "CustomerBuyGoodsOnline"
+    # elif subscription.payment_type == "Paybill": # check if C2B allows payments to banks using paybill
+    #     transaction_type = "CustomerPaybillOnline"
+    #     # assess making payments to banks
+    #     # account reference = decrypt_acc_number(subscription.account_number)
 
     mpesa = Mpesa(
-        mpesa_contact=mpesa_contact,
-        transaction_type=transaction_type,
-        business_short_code=business_short_code,
-        amount=int(subscription.amount),
+        mpesa_contact=254743277087, #mpesa_contact
+        transaction_type="CustomerPayBillOnline", #transaction_type
+        business_short_code=174379, #business_short_code
+        amount=1, #int(subscription.amount)
         account_ref=subscription.service_name,
         transaction_desc=f"{subscription.frequency} subscription for your {subscription.service_name}"
     )

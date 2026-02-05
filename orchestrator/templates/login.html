@@ -7,15 +7,33 @@
 </head>
 <body>
 <div class="form-group">
-   <form content="{{ url_for('user.login') }}" method="post">
-   <h2>Login</h2>
+   <form content="{{ url_for('auth.login') }}" method="post">
+   <h2>{{"OTP verification" if user else "login"}}</h2>
+   {% if not user %}
     <label for="email">email:</label>
     <input type="email" id="email" placeholder="email" name="email" required>
     <label for="password">password:</label>
     <input type="password" id="password" placeholder="password" name="password" required>
+   {% endif %}
+
+    {% if user %}
+   <p>check your email for the OPT verification code</p>
+    <input
+      type="text"
+      id="otp"
+      name="otp"
+      placeholder="OTP verification code"
+      inputmode="numeric"
+      autocomplete="one-time-code"
+      required
+    >
+    {% endif %}
     <button type="submit">
-      Log in
+        {{"verify OTP" if user else "log in"}}
     </button>
+    <a href="{{ url_for('auth.login') if user else url_for('auth.get_email')}}">
+        {{ "back to login" if user else "forgot password?"}}
+    </a>
   </form>
 </div>
 

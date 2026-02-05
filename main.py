@@ -13,7 +13,3 @@ if __name__ == "__main__":
 # handle message flashing
 
 
-
-
-
-

@@ -141,6 +141,28 @@ input::placeholder {
   transform: scale(1.02);
 }
 
+/* Forgot password link */
+.form-group a {
+  display: inline-block;
+  margin-top: 12px;
+  font-size: 14px;
+  color: #4CAF50;          /* same green as button */
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease, text-decoration 0.2s ease;
+}
+
+.form-group a:hover {
+  color: #45a049;          /* button hover green */
+  text-decoration: underline;
+}
+
+.helper-text {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 20px;
+}
+
 /* Card wrapper (same feel as form) */
 .detail-card {
   max-width: 500px;

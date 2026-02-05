@@ -2,23 +2,29 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Sign Up</title>
+    <title>sign Up</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
 <div class="form-group">
-   <form content="{{ url_for('user.signup') }}" method="post">
-    <h2>SignUp</h2>
+   <form content="{{ url_for('auth.account_recovery' if user else 'auth.signup', user_id=user.id) }}" method="post">
+    <h2>{{"update password" if user else "signUp"}}</h2>
+    {% if not user %}
     <label for="contact">mpesa number:</label>
     <input type="text" id="contact" placeholder="mpesa number" name="mpesa_number" required>
     <label for="username">username:</label>
     <input type="text" id="username" placeholder="username" name="username" required>
     <label for="email">email:</label>
     <input type="email" id="email" placeholder="email" name="email" required>
-    <label for="password">password:</label>
-    <input type="text" id="password" placeholder="password" name="password" required>
+    {% endif %}
+    <label for="password">{{"create new password" if user else "create password"}}:</label>
+    <input type="password" id="password" placeholder="new password" name="password" required>
+    {% if user %}
+    <label for="confirm-password">confirm password:</label>
+    <input type="password" id="confirm-password" placeholder="confirm password" name="update_password" required>
+    {% endif %}
     <button type="submit">
-      Sign up
+        {{"update password" if user else "sign Up"}}
     </button>
   </form>
 </div>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>verification email</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+
+<div class="form-group">
+  <form action="{{ url_for('auth.get_email') }}" method="post">
+    <h2>Verify your email</h2>
+
+    <p class="helper-text">
+      enter the email associated with this account; OTP verification code will be sent here
+    </p>
+
+    <label for="email">email:</label>
+    <input
+      type="email"
+      id="email"
+      name="email"
+      placeholder="email"
+      autocomplete="email"
+      required
+    >
+
+    <button type="submit">
+      Send code
+    </button>
+
+    <a href="{{ url_for('auth.login') }}">
+      Back to login
+    </a>
+  </form>
+</div>
+
+</body>
+</html>

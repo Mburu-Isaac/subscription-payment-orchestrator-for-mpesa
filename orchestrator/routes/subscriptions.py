@@ -126,7 +126,7 @@ def update_subscription(subscription_id):
         account_number=account_number
     )
 
-@bp.route("/delete/<int:subscription_id>")
+@bp.route("/delete/<int:subscription_id>")  # implement slug in place of subscription ID
 @login_required
 def delete_subscription(subscription_id):
     subscription_record = db.session.get(Subscription, subscription_id)
