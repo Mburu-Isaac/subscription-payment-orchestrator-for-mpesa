@@ -1,7 +1,8 @@
 from orchestrator.extensions import db
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import Integer, ForeignKey, String, DateTime
+from sqlalchemy import ForeignKey, String, DateTime
 from datetime import datetime
+
 
 class PasswordHistory(db.Model):
 

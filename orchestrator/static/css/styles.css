@@ -83,6 +83,7 @@ input::placeholder {
   background-color: #fdfdfd;
   font-family: Arial, sans-serif;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  position: relative;
 }
 
 /* Labels */
@@ -278,3 +279,32 @@ input::placeholder {
   background-color: #e0e0e0;
 }
 
+
+.flash-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 300px;
+  z-index: 9999;
+}
+
+.flash-message {
+  padding: 12px 20px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  color: #fff;
+  font-weight: 500;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  animation: slideIn 0.3s ease-out;
+}
+
+/* Categories */
+.flash-message.success { background-color: #4CAF50; }
+.flash-message.error { background-color: #e53935; }
+.flash-message.info { background-color: #2196F3; }
+
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(50px); }
+  to { opacity: 1; transform: translateX(0); }
+}

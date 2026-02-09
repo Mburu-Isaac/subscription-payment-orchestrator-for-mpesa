@@ -7,11 +7,20 @@
 </head>
 <body>
 
+<!-- {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-container">
+        {% for category, message in messages %}
+          <div class="flash-message {{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+{% endwith %} -->
+
   <form class="subscription-form">
     <h2>{{ current_user.user_name }}'s Subscriptions</h2>
     <ul class="subscription-list">
       {% for subscription in subscriptions %}
-        <li><a href="{{ url_for('subscription.read_subscription', subscription_id=subscription.id) }}">{{ subscription.service_name }}</a></li>
+        <li><a href="{{ url_for('subscription.read_subscription', slug=subscription.slug) }}">{{ subscription.service_name }}</a></li>
       {% endfor %}
     </ul>
   </form>

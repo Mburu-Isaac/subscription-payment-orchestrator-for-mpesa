@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 from orchestrator.extensions import db
 from orchestrator.models import OTP
-from datetime import datetime
+from datetime import datetime, timezone
 
 load_dotenv()
 
@@ -13,7 +13,7 @@ def generate_otp(length=6):
 def otp_cleanup():
     expired_otps = db.session.execute(
         db.select(OTP).where(
-            OTP.expires_at < datetime.utcnow()
+            OTP.expires_at < datetime.now(timezone.utc)
         )
     ).scalars().all()
 
@@ -28,8 +28,3 @@ def otp_cleanup():
         db.session.commit()
 
     return True
-
-# Generation: secrets
-# Storage: hash the OTP
-# Expiry: timestamp (e.g., 5 minutes)
-# Attempts: limit retries

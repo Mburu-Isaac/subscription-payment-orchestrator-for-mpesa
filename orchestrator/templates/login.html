@@ -6,8 +6,18 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-container">
+        {% for category,message in messages %}
+      <div class="flash-message {{ category }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
 <div class="form-group">
-   <form content="{{ url_for('auth.login') }}" method="post">
+   <form action="{{ url_for('auth.otp_verification', slug=user.slug) if user else url_for('auth.login') }}" method="post">
    <h2>{{"OTP verification" if user else "login"}}</h2>
    {% if not user %}
     <label for="email">email:</label>
@@ -36,6 +46,9 @@
     </a>
   </form>
 </div>
+</div>
+
+
 
 </body>
 </html>

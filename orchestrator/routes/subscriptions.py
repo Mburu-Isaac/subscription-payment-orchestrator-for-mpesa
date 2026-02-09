@@ -1,25 +1,38 @@
-from flask import Blueprint, render_template, request, redirect, url_for
+# add "add new subscription" button to create subscription form
+# clear fields when user wants to add a new record
+
+from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
-from orchestrator.models import Subscription
+from orchestrator.models import Subscription, User
 from orchestrator.extensions import db
 from datetime import datetime
-from orchestrator.security.encryption import encrypt_acc_number, decrypt_acc_number, decrypt_contact
+from orchestrator.security.encryption import (
+    encrypt_acc_number,
+    decrypt_acc_number,
+    decrypt_contact,
+)
+from orchestrator.utilities.slugify_utils import slugify_object
 
-bp = Blueprint("subscription",__name__)
+
+bp = Blueprint("subscription", __name__)
+
 
 @bp.route("/")
 @login_required
 def subscription_index():
-    # link to the dashboard - able to return to the dashboard and accessed from the dashboard
+    # link to the home page - able to return to the dashboard and accessed from the dashboard
     # add button to add to the subscriptions - links to the create_subscription route
-    user_subscription_records = db.session.execute(
-        db.select(Subscription).where(
-            Subscription.user_id == current_user.id
-        )
-    ).scalars().all()
-    return render_template("subscriptions.html", subscriptions=user_subscription_records)
+    user = db.session.execute(db.select(User)).scalar()
 
-@bp.route("/add-subscription", methods=["POST","GET"])
+    subscription_records = user.subscriptions
+
+    return render_template(
+        "subscriptions.html",
+        subscriptions=subscription_records,
+    )
+
+
+@bp.route("/add-subscription", methods=["POST", "GET"])
 @login_required
 def create_subscription():
     # make the next payment automatically recur - after 30/365/366 days -
@@ -28,17 +41,21 @@ def create_subscription():
 
         next_payment_str = request.form.get("next_payment_date")
         next_payment_date = datetime.strptime(next_payment_str, "%Y-%m-%d").date()
+        service_name = service_name = request.form.get("service_name")
+        slug = slugify_object(service_name)
 
         subscription = Subscription(
-            service_name=request.form.get("service_name"),
+            service_name=service_name,
+            slug=slug,
             payment_type=request.form.get("payment_type"),
             till_number=request.form.get("till_number") or None,
             paybill_number=request.form.get("paybill_number") or None,
-            account_number=encrypt_acc_number(request.form.get("account_number")) or None,
+            account_number=encrypt_acc_number(request.form.get("account_number"))
+            or None,
             amount=request.form.get("amount"),
             frequency=request.form.get("frequency"),
             next_payment_date=next_payment_date,
-            user=current_user
+            user=current_user,
         )
 
         try:
@@ -47,13 +64,19 @@ def create_subscription():
         except Exception:
             db.session.rollback()
             raise
-        return redirect(url_for("subscription.subscription_index")) # implement a button allowing users to add subscription records
+        return redirect(
+            url_for("subscription.subscription_index")
+        )  # implement a button allowing users to add subscription records
     return render_template("subscription-actions.html", subscription=None)
 
-@bp.route("/show/<int:subscription_id>")
+
+@bp.route("/show/<slug>")
 @login_required
-def read_subscription(subscription_id):
-    subscription = db.session.get(Subscription, subscription_id)
+def read_subscription(slug):
+    subscription = db.session.execute(
+        db.select(Subscription).where(Subscription.slug == slug)
+    ).scalar()
+
     mpesa_number = decrypt_contact(subscription.user.mpesa_number)
     account_number = decrypt_acc_number(subscription.account_number)
 
@@ -62,24 +85,37 @@ def read_subscription(subscription_id):
 
     return render_template(
         "subscription-details.html",
-        details=subscription,
+        subscription=subscription,
         mpesa_number=mpesa_number,
-        account_number=account_number
+        account_number=account_number,
     )
 
-@bp.route("/update/<int:subscription_id>", methods=["POST", "GET"])
+
+@bp.route("/update/<slug>", methods=["POST", "GET"])
 @login_required
-def update_subscription(subscription_id):
-    # update logic
+def update_subscription(slug):
+
+    subscription = db.session.execute(
+        db.select(Subscription).where(
+            Subscription.slug == slug
+        )  # NoneType - slug not being rendered
+    ).scalar()
+
+    print(subscription)
+
     if request.method == "POST":
         change_true = {}
 
-        subscription = db.session.get(Subscription, subscription_id)
+        slug = request.form.get("slug")
+        # print(slug)
 
         record_fields = [
-            column.name for column in Subscription.__table__.columns
-            if not column.primary_key and column.name not in ["created_at", "status", "user_id"]
+            column.name
+            for column in Subscription.__table__.columns
+            if not column.primary_key
+            and column.name not in ["created_at", "status", "user_id"]
         ]
+
 
         for field in record_fields:
             updated_value = request.form.get(field)
@@ -93,13 +129,19 @@ def update_subscription(subscription_id):
             if field == "account_number" and updated_value:
                 updated_value = encrypt_acc_number(updated_value)
 
+            if field == "service_name" and updated_value:
+                slug = slugify_object(updated_value)
+                # print(slug)
 
             if updated_value != initial_value:
                 setattr(subscription, field, updated_value)
                 change_true[field] = updated_value
 
-        if change_true:
+
+        if change_true or slug:
+
             try:
+                subscription.slug = slug
                 db.session.commit()
             except Exception:
                 db.session.rollback()
@@ -107,40 +149,46 @@ def update_subscription(subscription_id):
 
         return redirect(
             url_for(
-                "subscription.read_subscription", # provide feedback to user - update successful|update failed
-                subscription_id=subscription_id
+                "subscription.read_subscription",  # provide feedback to user - update successful|update failed
+                slug=subscription.slug,
             )
         )
 
-    subscription = db.session.get(Subscription, subscription_id)
     mpesa_number = decrypt_contact(subscription.user.mpesa_number)
     account_number = decrypt_acc_number(subscription.account_number)
 
     if not subscription:
-        return "subscription not found" # add action when record is not found - a redirect
+        return (
+            "subscription not found"  # add action when record is not found - a redirect
+        )
 
     return render_template(
         "subscription-actions.html",
         subscription=subscription,
         mpesa_number=mpesa_number,
-        account_number=account_number
+        account_number=account_number,
     )
 
-@bp.route("/delete/<int:subscription_id>")  # implement slug in place of subscription ID
+
+@bp.route("/delete/<slug>")  # implement slug in place of subscription ID
 @login_required
-def delete_subscription(subscription_id):
-    subscription_record = db.session.get(Subscription, subscription_id)
+def delete_subscription(slug):
+    subscription_record = db.session.execute(
+        db.select(Subscription).where(Subscription.slug == slug)
+    ).scalar()
 
     if not subscription_record:
         return "record cannot be found"
 
     try:
-        db.session.delete(subscription_record)  #Add confirmation that the user wants to delete the record
+        db.session.delete(
+            subscription_record
+        )  # Add confirmation that the user wants to delete the record
         db.session.commit()
     except Exception:
         db.session.rollback()
         raise
-    return redirect(url_for("subscription.subscription_index")) # notify user on record deletion - successful|unsuccessful
-
-
-
+    flash("record was deleted successfully")
+    return redirect(
+        url_for("subscription.subscription_index")
+    )  # notify user on record deletion - successful|unsuccessful

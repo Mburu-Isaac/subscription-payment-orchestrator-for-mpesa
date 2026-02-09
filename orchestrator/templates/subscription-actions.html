@@ -7,8 +7,23 @@
 
 </head>
 <body>
-  <form content="{{ url_for('subscription.update_subscription' if subscription else 'subscription.create_subscription', subscription_id=subscription.id) }}" method="post">
+<!-- 
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-container">
+        {% for category, message in messages %}
+          <div class="flash-message {{ category }}">{{ message }}</div>
+        {% endfor %}
+          {% endif %}
+{% endwith %} -->
+
+  <form content="{{ url_for('subscription.update_subscription', slug=subscription.slug) if subscription else url_for('subscription.create_subscription') }}" method="post">
     <h2>{{"Update Subscription" if subscription else "Subscription Service"}}</h2>
+    <!-- <input 
+          type="hidden",
+          name="slug"
+          value="subscription.slug"
+          > -->
     <label for="service-name">service name:</label>
     <input
             type="text"
@@ -94,5 +109,6 @@
     <button type="submit">{{"Update" if subscription else "Create Subscription"}}</button>
   </form>
   <a href="{{ url_for('auth.logout') }}">Log out</a>
+
 </body>
 </html>

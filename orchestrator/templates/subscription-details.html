@@ -7,7 +7,7 @@
 </head>
 <body>
 <div class="detail-card">
-  <h2>{{ details.user.user_name }} - {{ details.service_name }}</h2>
+  <h2>{{ subscription.user.user_name }} - {{ subscription.service_name }}</h2>
   <table class="detail-table">
     <tbody>
       <tr>
@@ -16,21 +16,21 @@
       </tr>
       <tr>
         <th>service name</th>
-        <td>{{ details.service_name }}</td>
+        <td>{{ subscription.service_name }}</td>
       </tr>
       <tr>
         <th>payment type</th>
-        <td>{{ details.payment_type }}</td>
+        <td>{{ subscription.payment_type }}</td>
       </tr>
-      {% if details.payment_type == "Till Number" %}
+      {% if subscription.payment_type == "Till Number" %}
         <tr>
           <th>till number</th>
-          <td>{{ details.till_number }}</td>
+          <td>{{ subscription.till_number }}</td>
         </tr>
       {% else %}
         <tr>
           <th>paybill number</th>
-          <td>{{ details.paybill_number }}</td>
+          <td>{{ subscription.paybill_number }}</td>
         </tr>
       <tr>
         <th>acc. number</th>
@@ -40,26 +40,26 @@
 
       <tr>
         <th>amount</th>
-        <td>{{ details.amount }}</td>
+        <td>{{ subscription.amount }}</td>
       </tr>
       <tr>
         <th>frequency</th>
-        <td>{{ details.frequency }}</td>
+        <td>{{ subscription.frequency }}</td>
       </tr>
       <tr>
         <th>next payment date</th>
-        <td>{{ details.next_payment_date }}</td>
+        <td>{{ subscription.next_payment_date }}</td>
       </tr>
       <tr>
         <th>status</th>
-        <td>{{ details.status }}</td>
+        <td>{{ subscription.status }}</td>
       </tr>
     </tbody>
   </table>
 
   <div class="detail-actions">
-    <a href="{{ url_for('subscription.update_subscription', subscription_id=details.id) }}" class="btn edit">Edit</a>
-    <a href="{{ url_for('subscription.delete_subscription', subscription_id=details.id) }}" class="btn delete-link">Delete</a>
+    <a href="{{ url_for('subscription.update_subscription', slug=subscription.slug) }}" class="btn edit">Edit</a>
+    <a href="{{ url_for('subscription.delete_subscription', slug=subscription.slug) }}" class="btn delete-link">Delete</a>
   </div>
 
 </div>

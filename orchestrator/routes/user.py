@@ -1,7 +1,13 @@
+# implement slugify on all user routes - user their username
+
 from flask_login import login_required
 from flask import Blueprint
 
 bp = Blueprint("user", __name__)
+
+@bp.route("/home-page")
+def index_page(): # share the same HTML file as main index page
+    pass
 
 @bp.route("/update")
 @login_required

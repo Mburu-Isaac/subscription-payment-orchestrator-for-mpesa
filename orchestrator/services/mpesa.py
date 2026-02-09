@@ -37,6 +37,7 @@ class Mpesa:
         updates the access token's expiry time
         returns the access token"""
 
+
         try:
             response = requests.get(
                 url="https://sandbox.safaricom.co.ke/oauth/v1/generate",
