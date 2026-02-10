@@ -2,7 +2,7 @@
 # implement message flashing
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash
-from flask_login import login_user, login_required, logout_user
+from flask_login import login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from orchestrator.extensions import db
 from orchestrator.models import User, OTP, PasswordHistory
@@ -19,6 +19,10 @@ bp = Blueprint("auth", __name__)
 
 @bp.route("/signup", methods=["GET", "POST"])
 def signup():  # add verification for signup - reinforce authentication at signup?
+
+    if current_user.is_authenticated:
+        return redirect(url_for("main.index_page"))
+
     if request.method == "POST":
 
         email = hash_email(request.form.get("email")) 
@@ -46,7 +50,6 @@ def signup():  # add verification for signup - reinforce authentication at signu
 
             password = PasswordHistory(user=user, password=hashed_password)
 
-
             try:
                 db.session.add_all([user, password])
                 db.session.commit()
@@ -68,6 +71,9 @@ def signup():  # add verification for signup - reinforce authentication at signu
 def login():
 
     # prevent user from backtracking to login page - current_user.is_authenticated
+    if current_user.is_authenticated:
+        return redirect(url_for("main.index_page"))
+
 
     if request.method == "POST":
 
@@ -103,7 +109,7 @@ def login():
                     raise
             login_user(user_object) 
             return redirect(
-                url_for("subscription.subscription_index")
+                url_for("main.index_page")
             )  # create a home page
             # list of what users can do subscriptions|transactions|profile
         except VerifyMismatchError:
@@ -115,6 +121,9 @@ def login():
 
 @bp.route("/account-recovery/<slug>", methods=["GET", "POST"])
 def account_recovery(slug):
+
+    if current_user.is_authenticated:
+        return redirect(url_for("main.index_page"))
 
     user = db.session.execute(
         db.select(User).where(User.slug == slug)
@@ -160,6 +169,9 @@ def account_recovery(slug):
 @bp.route("/recovery-email", methods=["GET", "POST"])
 def get_email():
 
+    if current_user.is_authenticated:
+        return redirect(url_for("main.index_page"))
+
     if request.method == "POST":
         email = request.form.get("email")
 
@@ -199,6 +211,9 @@ def get_email():
 
 @bp.route("/otp-verification/<slug>", methods=["GET", "POST"])
 def otp_verification(slug):
+
+    if current_user.is_authenticated:
+        return redirect(url_for("main.index_page"))
 
     user = db.session.execute(
         db.select(User).where(User.slug == slug)
@@ -258,4 +273,4 @@ def otp_verification(slug):
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for("auth.login"))
+    return redirect(url_for("main.index_page"))

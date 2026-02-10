@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>App Landing</title></head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+
+<body>
+
+    <header>
+        <nav>
+            {% if not user.is_authenticated %}
+            <a href="{{ url_for('auth.login') }}">login</a>
+            <a href="{{ url_for('auth.signup') }}">signUp</a>
+            <!-- portfolio -->
+            <a href="">Me</a> 
+            {% else %}
+            <a href="{{ url_for('main.index_page') }}">Home</a>
+            <a href="">about company</a>
+            <a href="">contact info</a>
+            <a href="{{ url_for('auth.logout') }}">logout</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    {% if not user.is_authenticated %}
+    <main>
+        <div class="hero">
+            <h1>Backend Test Landing</h1>
+            <p>
+                Minimal interface. Clean layout.  
+                Built to validate routes, auth, and session flow.
+            </p>
+        </div>
+    </main>
+    {% endif %}
+
+   
+{% if user.is_authenticated %}
+
+<!-- add section with links to profile, subscriptions, transactions etc -->
+
+<section class="quick-links">
+    <a href="{{ url_for('user.user_profile') }}">profile</a>
+    <a href="{{ url_for('subscription.subscription_index') }}">subscriptions</a>
+    <a href="#">transactions</a>
+    <a href="#">etc</a>
+</section>
+
+
+<section class="education">
+    <div class="education-content">
+        <h2>How the System Works</h2>
+        <p>
+            This platform is designed to orchestrate subscriptions, manage access,
+            and handle secure transactions with minimal overhead.
+        </p>
+        <p>
+            Each request is validated, logged, and processed through a predictable
+            backend flow to ensure reliability and transparency.
+        </p>
+    </div>
+</section>
+{% endif %}
+
+
+</body>
+</html>
+
+
+
+
+

@@ -20,7 +20,7 @@ bp = Blueprint("subscription", __name__)
 @bp.route("/")
 @login_required
 def subscription_index():
-    # link to the home page - able to return to the dashboard and accessed from the dashboard
+    # link to the home page - able to return to the homepage and accessed from the homepage
     # add button to add to the subscriptions - links to the create_subscription route
     user = db.session.execute(db.select(User)).scalar()
 
@@ -98,16 +98,13 @@ def update_subscription(slug):
     subscription = db.session.execute(
         db.select(Subscription).where(
             Subscription.slug == slug
-        )  # NoneType - slug not being rendered
+        )
     ).scalar()
-
-    print(subscription)
 
     if request.method == "POST":
         change_true = {}
 
-        slug = request.form.get("slug")
-        # print(slug)
+        slug = None
 
         record_fields = [
             column.name
@@ -138,10 +135,11 @@ def update_subscription(slug):
                 change_true[field] = updated_value
 
 
-        if change_true or slug:
+        if change_true:
 
             try:
-                subscription.slug = slug
+                if slug:
+                    subscription.slug = slug
                 db.session.commit()
             except Exception:
                 db.session.rollback()

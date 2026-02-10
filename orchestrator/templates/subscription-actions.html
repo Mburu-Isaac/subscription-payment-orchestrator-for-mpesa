@@ -19,11 +19,6 @@
 
   <form content="{{ url_for('subscription.update_subscription', slug=subscription.slug) if subscription else url_for('subscription.create_subscription') }}" method="post">
     <h2>{{"Update Subscription" if subscription else "Subscription Service"}}</h2>
-    <!-- <input 
-          type="hidden",
-          name="slug"
-          value="subscription.slug"
-          > -->
     <label for="service-name">service name:</label>
     <input
             type="text"

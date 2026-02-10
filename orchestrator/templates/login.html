@@ -42,7 +42,10 @@
         {{"verify OTP" if user else "log in"}}
     </button>
     <a href="{{ url_for('auth.login') if user else url_for('auth.get_email')}}">
-        {{ "back to login" if user else "forgot password?"}}
+        {{ "back to login" if user else "forgot password?"}} 
+        <!-- add link to landing page 
+         {{ url_for('main.index_page') }}
+          -->
     </a>
   </form>
 </div>
