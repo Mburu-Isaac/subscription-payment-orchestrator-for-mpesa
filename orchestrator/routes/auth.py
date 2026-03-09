@@ -16,10 +16,9 @@ from orchestrator.utilities.slugify_utils import slugify_object
 
 bp = Blueprint("auth", __name__)
 
-
 @bp.route("/signup", methods=["GET", "POST"])
-def signup():  # add verification for signup - reinforce authentication at signup?
-
+def signup():  # add verification for signup - reinforce authentication at signup? 
+            # authenticate via email
     if current_user.is_authenticated:
         return redirect(url_for("main.index_page"))
 
@@ -57,33 +56,25 @@ def signup():  # add verification for signup - reinforce authentication at signu
                 db.session.rollback()
                 raise
 
-            login_user(user)
-
             return redirect(
-                url_for("subscription.create_subscription")
-            )  # redirect to home page after creation
-            # when user is freshly signed up
-            # have "create subscriptions" of the three links alone
+                url_for("auth.login")
+            )  
+
     return render_template("signup.html", user=None)
 
 
 @bp.route("/login", methods=["GET", "POST"])
 def login():
 
-    # prevent user from backtracking to login page - current_user.is_authenticated
     if current_user.is_authenticated:
         return redirect(url_for("main.index_page"))
 
 
     if request.method == "POST":
 
-        print(request.form.get("email"))
-
         user_object = db.session.execute(
             db.select(User).where(User.email == hash_email(request.form.get("email")))
         ).scalar()
-
-        print(user_object)
 
         if not user_object:
             flash("email does not exist. confirm email is correct|sign up", "info")
@@ -110,8 +101,8 @@ def login():
             login_user(user_object) 
             return redirect(
                 url_for("main.index_page")
-            )  # create a home page
-            # list of what users can do subscriptions|transactions|profile
+            ) 
+
         except VerifyMismatchError:
             flash("wrong password. please try again", "info")
             return redirect(url_for("auth.login"))

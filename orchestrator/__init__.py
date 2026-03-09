@@ -1,7 +1,6 @@
 from flask import Flask
 from .extensions import db, login_manager
 
-
 def create_app():
 
     app = Flask(__name__)
@@ -15,8 +14,8 @@ def create_app():
 
     from orchestrator import models  # noqa:F401
 
-    # with app.app_context():
-    #     db.create_all()
+    with app.app_context():
+        db.create_all()
 
     from orchestrator.routes.payments import bp as transactions_bp
     from orchestrator.routes.subscriptions import bp as subscriptions_bp

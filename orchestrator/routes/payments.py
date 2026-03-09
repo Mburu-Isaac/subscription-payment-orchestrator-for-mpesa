@@ -1,74 +1,89 @@
 # handle payment functions
 # add to transaction table
 
-from flask import Blueprint,request,jsonify
-from orchestrator.services import Mpesa
+from flask import Blueprint,request,jsonify, redirect, url_for
+from flask_login import current_user
+# from orchestrator.services import Mpesa
 from orchestrator.models import Transaction, Subscription
 from orchestrator.extensions import db
 from pprint import pprint
 from orchestrator.security.encryption import decrypt_contact, decrypt_acc_number
-from orchestrator.utilities.canonicalize import standardize_contact
+# from orchestrator.utilities.canonicalize import standardize_contact
+from orchestrator.utilities.scheduler import process_subscription
+# from datetime import datetime,time,timedelta,date
+from orchestrator.utilities.recur import recur
 
 bp = Blueprint("payment", __name__)
 
-@bp.route("/make-payment/<int:subscription_id>")
-def make_payment(subscription_id):
-    subscription = db.session.get(Subscription, subscription_id)
+# @bp.route("/make-payment")
+# def make_payment():
 
-    mpesa_contact = int(
-        standardize_contact(
-            decrypt_contact(
-                subscription.user.mpesa_number
-            )
-        )
-    )
+#     print(process_subscription())
 
-    # transaction_type = ""
-    # business_short_code = 0
-    #
-    # if subscription.payment_type == "Till Number":
-    #     business_short_code = int(subscription.till_number) # "174379"
-    #     transaction_type = "CustomerBuyGoodsOnline"
-    # elif subscription.payment_type == "Paybill": # check if C2B allows payments to banks using paybill
-    #     transaction_type = "CustomerPaybillOnline"
-    #     # assess making payments to banks
-    #     # account reference = decrypt_acc_number(subscription.account_number)
-
-    mpesa = Mpesa(
-        mpesa_contact=254743277087, #mpesa_contact
-        transaction_type="CustomerPayBillOnline", #transaction_type
-        business_short_code=174379, #business_short_code
-        amount=1, #int(subscription.amount)
-        account_ref=subscription.service_name,
-        transaction_desc=f"{subscription.frequency} subscription for your {subscription.service_name}"
-    )
-
-    mpesa.token_cache()
-    return mpesa.stk_push()
+#     return "loading..."
+#     # redirect(url_for("payment.stk_callback"))
 
 @bp.route("/stk-callback", methods=["POST", "GET"])
 def stk_callback():
-    callback_data = request.get_json(silent=True)
+    data = request.get_json(silent=True)
 
-    if not callback_data:
+    if not data:
         return {
             "error":"invalid json"
         }, 400
 
-    pprint(callback_data)
+    # pprint(data)
 
-    callback = callback_data['Body']['stkCallback']
-    result_code = callback['ResultCode']
-    checkout_request_id = callback['CheckoutRequestID']
-    result_description = callback['ResultDesc']
+    if (callback_data := data.get("Body", {}).get("stkCallback")):
+        result_code = callback_data.get("ResultCode")
+        checkout_request_id = callback_data.get("CheckoutRequestID")
+        result_desc = callback_data.get("ResultDesc")
 
-    if result_code == 0:
-        amount = float(callback['CallbackMetadata']['Item'][0]['Value'])
-        receipt_number = callback['CallbackMetadata']['Item'][1]['Value']
+        transaction = db.session.execute(
+            db.select(Transaction).where(
+                Transaction.checkout_request_id == checkout_request_id
+            )
+        ).scalar()
 
+        subscription = db.session.get(Subscription,transaction.subscription.id)
+    
+        try:
 
-        # use relationship to specify transaction type - subscription.payment_type
-        # use relationship to specify subscription id
+            if result_code == 0:
+
+                callback_metadata_item = callback_data.get("CallbackMetadata").get("Item")
+                mpesa_receipt_number = callback_metadata_item[1].get("Value")
+
+                transaction.status = "success"
+                transaction.checkout_request_id = checkout_request_id
+                transaction.mpesa_receipt_number = mpesa_receipt_number
+
+                subscription.next_payment_at = recur(
+                    base_date = subscription.next_payment_date,
+                    frequency = subscription.frequency
+                )
+
+                transaction.retry_count = 0
+
+            else:
+                transaction.status = "fail"
+                transaction.failure_reason = result_desc
+
+                transaction.retry_count += 1
+
+                if subscription.max_retries is None:
+                    subscription.max_retries = 3
+
+                if transaction.retry_count >= subscription.max_retries:
+                    subscription.status = "paused"  
+                    print(f"{subscription.service_name} paused") # notify the user when subcription is paused
+            
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+            raise
+    else:
+        ResultCode = CheckoutRequest_id = ResultDesc = None
 
 
     return jsonify(
@@ -85,3 +100,4 @@ def view_transactions():
 
 
 # make payment - do when implementing automation mechanism
+

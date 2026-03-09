@@ -2,6 +2,7 @@ from orchestrator.extensions import db
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import Integer, String, DateTime, ForeignKey, Float
 from datetime import datetime, timezone
+from sqlalchemy import text
 
 class Transaction(db.Model):
 
@@ -15,9 +16,7 @@ class Transaction(db.Model):
         ),  # return the name of the subscription - transaction_object.subscription.name
         nullable=False,
     )
-    slugify: Mapped[str] = mapped_column(
-        String(100), nullable=False
-    )  # slug = transaction_object.subscription.name - transaction_object.mpesa-receipt-number
+    indempotency_key: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
     amount: Mapped[float] = mapped_column(Float, nullable=False)
     payment_type: Mapped[str] = mapped_column(String, nullable=False)
     status: Mapped[str] = mapped_column(
@@ -27,3 +26,13 @@ class Transaction(db.Model):
     mpesa_receipt_number: Mapped[str] = mapped_column(String, nullable=True)
     failure_reason: Mapped[str] = mapped_column(String, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(timezone.utc))
+
+    # scheduler logic
+    retry_count: Mapped[int] = mapped_column(
+        Integer,
+        default=0,
+        server_default=text("0"),
+        nullable=False
+        )
+    last_attempted_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+    

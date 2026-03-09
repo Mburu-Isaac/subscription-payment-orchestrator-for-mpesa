@@ -7,7 +7,8 @@
 
 </head>
 <body>
-<!-- 
+  
+
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
       <div class="flash-container">
@@ -15,7 +16,7 @@
           <div class="flash-message {{ category }}">{{ message }}</div>
         {% endfor %}
           {% endif %}
-{% endwith %} -->
+{% endwith %}
 
   <form content="{{ url_for('subscription.update_subscription', slug=subscription.slug) if subscription else url_for('subscription.create_subscription') }}" method="post">
     <h2>{{"Update Subscription" if subscription else "Subscription Service"}}</h2>
@@ -25,16 +26,18 @@
             id="service-name"
             name="service_name"
             placeholder="Gym subscription"
-            value="{{ subscription.service_name if subscription else '' }}"
+            value="{{ form_data.get('service_name', '') }}"
             required
     >
 
     <label for="payment-type">payment type:</label>
     <select id="payment-type" name="payment_type" required>
       {% set options = ["Paybill", "Till Number"] %} <!-- get it to say "Till Number -->
+      {% set current_payment_type = form_data.get('payment_type') %}
+
       {% for option in options %}
       <option value="{{ option }}"
-              {% if subscription and subscription.payment_type == option %}
+              {% if option == current_payment_type %}
                 selected
               {% endif %}
       >
@@ -50,7 +53,7 @@
            id="till-number"
            name="till_number"
            placeholder="1234567"
-           value="{{ subscription.till_number if subscription else '' }}"
+           value="{{ form_data.get('till_number', '') }}" 
     >
 
     <label for="paybill-number">paybill number:</label>
@@ -58,7 +61,7 @@
            id="paybill-number"
            name="paybill_number"
            placeholder="522522"
-           value="{{ subscription.paybill_number if subscription else '' }}"
+           value="{{ form_data.get('paybill_number', '') }}"
     >
 
     <label for="acc-number">acc number:</label>
@@ -66,7 +69,7 @@
            id="acc-number"
            name="account_number"
            placeholder="12345ABC"
-           value="{{ account_number if subscription else '' }}"
+           value="{{ form_data.get('account_number', '') }}"
     >
 
     <label for="amount">amount: </label>
@@ -76,16 +79,19 @@
            placeholder="service cost"
            step="0.01"
            min="100"
-           value="{{ subscription.amount if subscription else '' }}"
+           value="{{ form_data.get('amount', '') }}"
            required
     >
 
     <label for="frequency">Frequency: </label>
     <select id="frequency" name="frequency" required>
-      {% set options = ["Monthly", "Annually"] %}
+
+      {% set options = ["Monthly", "Annually", "Weekly", "Daily"] %}
+      {% set current_frequency = form_data.get('frequency') %}
+
       {% for option in options %}
       <option value="{{ option }}"
-              {% if subscription and subscription.frequency == option%}selected{% endif %}
+              {% if option == current_frequency %}selected{% endif %}
       >
         {{ option }}
         {% endfor %}
@@ -95,10 +101,9 @@
 
     <label for="next-payment">Next Payment: </label>
     <input type="date"
-           id="next-payment"
-           name="next_payment_date"
-           value="{{ subscription.next_payment_date.strftime('%Y-%m-%d') if subscription else '' }}"
-           required
+          id="next-payment"
+          name="next_payment_date"
+          value="{{ form_data.get('next_payment_date') }}"
     >
 
     <button type="submit">{{"Update" if subscription else "Create Subscription"}}</button>

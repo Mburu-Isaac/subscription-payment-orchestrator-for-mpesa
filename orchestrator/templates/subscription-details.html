@@ -48,7 +48,7 @@
       </tr>
       <tr>
         <th>next payment date</th>
-        <td>{{ subscription.next_payment_date }}</td>
+        <td>{{ subscription.next_payment_date if subscription.next_payment_at is none else subscription.next_payment_at}}</td>
       </tr>
       <tr>
         <th>status</th>

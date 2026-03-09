@@ -13,13 +13,32 @@ class User(db.Model, UserMixin):
     mpesa_number: Mapped[bytes] = mapped_column(LargeBinary, nullable=False)
     user_name: Mapped[str] = mapped_column(String(255), nullable=False)
     slug: Mapped[str] = mapped_column(String(100), nullable=False)
-    email: Mapped[str] = mapped_column(String(), nullable=False, unique=True)
+    email: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
     password: Mapped[str] = mapped_column(String(), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(timezone.utc))
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
-    subscriptions = db.relationship("Subscription", backref="user", lazy=True)
-    otps = db.relationship("OTP", backref="auth_user", lazy=True)
-    password_history = db.relationship("PasswordHistory", backref="user", lazy=True)
+
+    # relationships
+    subscriptions = db.relationship(
+        "Subscription",
+        backref="user",
+        lazy=True,
+        cascade="all, delete-orphan"        # cascade parent tables
+    )
+
+    otps = db.relationship(
+        "OTP", 
+        backref="auth_user",
+        lazy=True,
+        cascade="all, delete-orphan"
+    )
+
+    password_history = db.relationship(
+        "PasswordHistory",
+        backref="user",
+        lazy=True,
+        cascade="all, delete-orphan"
+    )
 
 
 @login_manager.user_loader

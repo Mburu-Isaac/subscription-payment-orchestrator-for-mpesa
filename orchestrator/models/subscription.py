@@ -2,6 +2,7 @@ from orchestrator.extensions import db
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import Integer, String, DateTime, ForeignKey, Float, LargeBinary
 from datetime import datetime, timezone
+from sqlalchemy import text
 
 
 class Subscription(db.Model):
@@ -13,7 +14,17 @@ class Subscription(db.Model):
         Integer, ForeignKey("users.id"), nullable=False
     )
     service_name: Mapped[str] = mapped_column(String(30), nullable=False)
-    slug: Mapped[str] = mapped_column(String(255), nullable=False)
+    fingerprint: Mapped[str] = mapped_column(
+        String(64),
+        unique=True,
+        nullable=False,
+        index=True) 
+    slug: Mapped[str] = mapped_column(
+        String(255),
+        unique=True,
+        nullable=False,
+        index=True
+        )
     payment_type: Mapped[str] = mapped_column(
         String, nullable=False
     )  # Paybill|Till Number
@@ -26,4 +37,17 @@ class Subscription(db.Model):
     status: Mapped[str] = mapped_column(String, default="active")  # active|paused
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(timezone.utc))
 
-    transactions = db.relationship("Transaction", backref="subscription", lazy=True)
+    # scheduler logic
+    next_payment_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+    max_retries: Mapped[int] = mapped_column(
+        Integer,
+        default=3,
+        server_default=text("3"),
+        nullable=False,
+    )
+    transactions = db.relationship(
+        "Transaction",
+        backref="subscription",
+        lazy=True,
+        cascade="all, delete-orphan"
+    )
