@@ -31,4 +31,3 @@ def activate_subscription(subscription):
 
 
 
-# return True or False

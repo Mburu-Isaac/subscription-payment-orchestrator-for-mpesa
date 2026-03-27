@@ -17,11 +17,8 @@ def fetch_due_subscriptions(batch_size):
             skip_locked=True).limit(batch_size)
     ).scalars().all()
 
-    # notify the user if subscription status is paused
-    # implement converting status from 'paused' to 'active'
-    # for subscription in subscriptions:
-    #     print(subscription.next_payment_at)
-    
+    # notify the user if subscription status is paused : notification
+
     return subscriptions 
 
 def generate_idempotency_key(subscription):
@@ -118,7 +115,7 @@ def process_subscription(batch_size=5):
 
             if subscription.status != "active":
                 continue  # cancelled - user permanently stopped subscription/ deleted subscription - worker should [never charge again]
-                        # payment failed - billing failed multiple times: 3 retries failed, insufficient funds - worker should [stop charging, notify the user]
+                        # payment failed - billing failed multiple times: 3 retries failed, insufficient funds - worker should [stop charging, notify the user : notification]
                       # expired - subscription duration ended - worker should [stop billing]
                     # trial - user is in free trial period - worker should - [ not charge yet until trial_end_date]
                    

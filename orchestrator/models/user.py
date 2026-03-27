@@ -17,13 +17,14 @@ class User(db.Model, UserMixin):
     password: Mapped[str] = mapped_column(String(), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(timezone.utc))
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    verification_status: Mapped[str] = mapped_column(String(30), default="unverified")
 
     # relationships
     subscriptions = db.relationship(
         "Subscription",
         backref="user",
         lazy=True,
-        cascade="all, delete-orphan"        # cascade parent tables
+        cascade="all, delete-orphan"        
     )
 
     otps = db.relationship(
@@ -35,6 +36,13 @@ class User(db.Model, UserMixin):
 
     password_history = db.relationship(
         "PasswordHistory",
+        backref="user",
+        lazy=True,
+        cascade="all, delete-orphan"
+    )
+
+    refresh_token = db.relationship(
+        "RefreshTokens",
         backref="user",
         lazy=True,
         cascade="all, delete-orphan"

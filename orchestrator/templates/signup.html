@@ -18,7 +18,7 @@
   {% endwith %}
 
 <div class="form-group">
-   <form content="{{ url_for('auth.account_recovery' if user else 'auth.signup', slug=user.slug) }}" method="post">
+   <form action="{{ url_for('auth.account_recovery' if user else 'auth.signup', slug=user.slug) }}" method="post">
     <h2>{{"update password" if user else "signUp"}}</h2>
     {% if not user %}
     <label for="contact">mpesa number:</label>

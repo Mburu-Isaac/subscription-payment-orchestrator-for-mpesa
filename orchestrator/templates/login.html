@@ -17,7 +17,7 @@
 {% endwith %}
 
 <div class="form-group">
-   <form action="{{ url_for('auth.otp_verification', slug=user.slug) if user else url_for('auth.login') }}" method="post">
+   <form action="{{ url_for('auth.otp_verification', slug=user.slug, otp_type=otp_type) if user else url_for('auth.login') }}" method="post">
    <h2>{{"OTP verification" if user else "login"}}</h2>
    {% if not user %}
     <label for="email">email:</label>
@@ -38,6 +38,7 @@
       required
     >
     {% endif %}
+    
     <button type="submit">
         {{"verify OTP" if user else "log in"}}
     </button>

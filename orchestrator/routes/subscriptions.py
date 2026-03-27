@@ -1,6 +1,3 @@
-# add "add new subscription" button to create subscription form
-# clear fields when user wants to add a new record
-
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 from orchestrator.models import Subscription, User, Transaction
@@ -23,7 +20,7 @@ bp = Blueprint("subscription", __name__)
 @bp.route("/")
 @login_required
 def subscription_index():
-    # add button to add to the subscriptions - links to the create_subscription route
+    # add a link - create subscription - that redirects to create_subscription route
     user = db.session.execute(db.select(User)).scalar()
 
     subscription_records = user.subscriptions
@@ -120,9 +117,11 @@ def create_subscription():
             except Exception:
                 db.session.rollback()
                 raise
+
             return redirect(
                 url_for("subscription.create_subscription")
-            )  # implement a button allowing users to add subscription records
+            ) 
+
     return render_template(
         "subscription-actions.html",
         subscription=None,
@@ -267,7 +266,7 @@ def update_subscription(slug):
 
         return redirect(
             url_for(
-                "subscription.read_subscription",  # provide feedback to user - update successful|update failed
+                "subscription.read_subscription",  # provide feedback to user - update successful|update failed : notification
                 slug=subscription.slug,
             )
         )
@@ -280,9 +279,7 @@ def update_subscription(slug):
         account_number = decrypt_acc_number(subscription.account_number)
 
     if not subscription:
-        return (
-            "subscription not found"  # add action when record is not found - a redirect
-        )
+            print(f"subscription {subscription.id} : {subscription.service_name} not found | user {subscription.user.user_id}")  
 
 
     form_data = {
@@ -318,14 +315,8 @@ def delete_subscription(slug):
         db.select(Subscription).where(Subscription.slug == slug)
     ).scalar()
 
-    transaction_records = db.session.execute(
-        db.select(Transaction).where(
-            Transaction.subscription_id == subscription_record.id
-        )
-    ).scalars().all()
-
     if not subscription_record:
-        return "record cannot be found"
+        return "record cannot be found" # mechanism to handle when deletion on an already deleted record : defensive
 
     try:
 
@@ -341,4 +332,4 @@ def delete_subscription(slug):
     flash("record was deleted successfully")
     return redirect(
         url_for("subscription.subscription_index")
-    )  # notify user on record deletion - successful|unsuccessful
+    )  

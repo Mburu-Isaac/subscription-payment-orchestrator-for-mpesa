@@ -29,3 +29,7 @@ def generate_subscription_fingerprint(
 
   return fingerprint
 
+
+def generate_service_fingerprint():
+  pass
+

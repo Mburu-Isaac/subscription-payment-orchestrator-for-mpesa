@@ -1,27 +1,11 @@
-# handle payment functions
-# add to transaction table
-
-from flask import Blueprint,request,jsonify, redirect, url_for
-from flask_login import current_user
-# from orchestrator.services import Mpesa
+from flask import Blueprint,request,jsonify
 from orchestrator.models import Transaction, Subscription
 from orchestrator.extensions import db
-from pprint import pprint
-from orchestrator.security.encryption import decrypt_contact, decrypt_acc_number
-# from orchestrator.utilities.canonicalize import standardize_contact
-from orchestrator.utilities.scheduler import process_subscription
 # from datetime import datetime,time,timedelta,date
 from orchestrator.utilities.recur import recur
 
 bp = Blueprint("payment", __name__)
 
-# @bp.route("/make-payment")
-# def make_payment():
-
-#     print(process_subscription())
-
-#     return "loading..."
-#     # redirect(url_for("payment.stk_callback"))
 
 @bp.route("/stk-callback", methods=["POST", "GET"])
 def stk_callback():
@@ -76,7 +60,7 @@ def stk_callback():
 
                 if transaction.retry_count >= subscription.max_retries:
                     subscription.status = "paused"  
-                    print(f"{subscription.service_name} paused") # notify the user when subcription is paused
+                    print(f"{subscription.service_name} paused") # notify the user when subcription is paused : notification
             
             db.session.commit()
         except Exception:
@@ -98,6 +82,4 @@ def view_transactions():
     pass
 
 
-
-# make payment - do when implementing automation mechanism
 

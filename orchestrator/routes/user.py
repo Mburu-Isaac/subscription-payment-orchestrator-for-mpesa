@@ -23,4 +23,4 @@ def user_profile():
 @bp.route("/delete-account")
 @login_required
 def delete():
-    return "route deletes user account"
+    return "route deletes user account" # add a grace period where the user can recover their account - snap approach
