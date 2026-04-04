@@ -10,6 +10,8 @@ from orchestrator.utilities.otps import manage_otp
 from orchestrator.utilities.email.templates import otp_email, verification_email 
 from datetime import datetime, timedelta
 from orchestrator.utilities.slugify_utils import slugify_object
+from orchestrator.utilities.user_login import log_in_user
+from orchestrator.utilities.forward_otp import handle_otp_forwarding
 from os import abort
 
 
@@ -60,29 +62,32 @@ def signup():  # add verification for signup
                 db.session.commit()
 
                 otp_type = "User Signup"
-                otp_type_slug = slugify_object(otp_type)
 
-                result = otp_email(
+                result = handle_otp_forwarding(
                     user=user,
-                    otp_type=otp_type_slug,
-                    email=email,
-                    ttl=timedelta(minutes=5),
-                    attempts_left=3
+                    otp_type=otp_type,
+                    email=email
                 )
 
-                if result["success"]:
-                    flash(result.get("message"), "success")
+                otp_forwarding = result[0]
+
+                if otp_forwarding["success"]:
+                    flash(otp_forwarding.get("message"), "success")
                     return redirect(
                         url_for(
                             "auth.otp_verification",
                             slug=user.slug,
-                            otp_type=otp_type_slug
+                            otp_type=result[1]
                         )
                     )
-                
+
                 else:
-                    flash(result.get("error"), "error")
-                    return redirect(url_for("auth.signup"))
+                    flash(otp_forwarding.get("error"), "error")
+                    return redirect(
+                        url_for(
+                            "auth.signup"
+                        )
+                    )
                     
             except Exception:
                 db.session.rollback()
@@ -112,6 +117,8 @@ def signup():  # add verification for signup
 @bp.route("/login", methods=["GET", "POST"])    # add 2-factor authentication 
 def login():
 
+    otp_type = request.args.get("otp_type")
+
     if current_user.is_authenticated:
         return redirect(url_for("main.index_page"))
 
@@ -125,35 +132,59 @@ def login():
         if not user_object:
             flash("email does not exist. confirm email is correct|sign up", "info")
             return redirect(
-                url_for("auth.login")
+                url_for(
+                    "auth.login",
+                    # otp_type=None
+                )
             )  # add mechanism that allows the user to
             # head to signup page
 
-        stored_hash = user_object.password
+        stored_password_hash = user_object.password
         password_attempt = request.form.get("password")
 
         try:
-            ph.verify(stored_hash, password_attempt)
+            ph.verify(stored_password_hash, password_attempt)
 
-            if ph.check_needs_rehash(stored_hash):
-                updated_hash = ph.hash(password_attempt)
+            decisive_otp_type = request.form.get("otp_type")
 
-                try:
-                    user_object.password = updated_hash
-                    db.session.commit()
-                except Exception:
-                    db.session.rollback()
-                    raise
-            login_user(user_object) 
-            return redirect(
-                url_for("main.index_page")
-            ) 
+            if ph.check_needs_rehash(stored_password_hash):
+                updated_password_hash = ph.hash(password_attempt)
+
+                user_object.password = updated_password_hash
+                db.session.commit()
+
+            else:
+
+                if decisive_otp_type == "user-signup":
+                    log_in_user(user_object=user_object)
+
+
+            # if request.form.get("otp_type") is None:
+            #     print("otp non before otp")
+
+            #else:
+                # generate OTP
+                # authenticate OTP
+                # login user
+
+
+
+            # return redirect(
+            #     url_for("main.index_page")
+            # ) 
 
         except VerifyMismatchError:
             flash("wrong password. please try again", "info")
             return redirect(url_for("auth.login"))
 
-    return render_template("login.html")
+        except Exception:
+            db.session.rollback()
+            raise
+
+    return render_template(
+        "login.html",
+         otp_type=otp_type
+    )
 
 
 @bp.route("/account-recovery/<slug>", methods=["GET", "POST"])
@@ -274,19 +305,12 @@ def otp_verification(slug, otp_type):
                 otp_type=otp_type
             )
 
-            # if otp_type == "User Signup":
-            #     return redirect(
-            #         url_for(
-            #             "auth.login"
-            #         )
-            #     )
-
-        return redirect(
-            url_for(
-                "auth.account_recovery",
-                slug=user.slug
-            )
-        )
+        # return redirect(
+        #     url_for(
+        #         "auth.account_recovery",
+        #         slug=user.slug
+        #     )
+        # )
 
     return render_template(
         "login.html",

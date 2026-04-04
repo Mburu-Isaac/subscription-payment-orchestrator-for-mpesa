@@ -12,8 +12,7 @@ def otp_email(
     user,
     otp_type,
     email,
-    ttl,
-    attempts_left
+    ttl
 ):
 
     # purpose: verify the user's identity or email for a specific action
@@ -41,7 +40,7 @@ def otp_email(
         hashed_otp=generate_password_hash(otp),
         otp_type=otp_type,
         expires_at=expires_at,
-        attempts_left=attempts_left
+        attempts_left=3
     )
 
     try:

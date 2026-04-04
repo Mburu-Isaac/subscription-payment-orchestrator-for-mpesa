@@ -43,13 +43,6 @@ def manage_otp(
 
         elif check_password_hash(otp_record.hashed_otp, otp_attempt):
 
-            # return render_template(
-            #         "signup.html",
-            #         user=user
-            #     )
-
-            
-
             if otp_type.lower() == "password-reset":
                 return render_template(
                     "signup.html",
@@ -59,8 +52,11 @@ def manage_otp(
             if otp_type.lower() == "user-signup":
                 flash("Sign up was successful. Proceed to login", "success")
                 return redirect(
-                    url_for("auth.login")
-                )
+                    url_for(
+                        "auth.login",
+                        otp_type=otp_type
+                    )
+                ) 
 
             # if otp_type == "Login-Verification":
             #     return redirect(
@@ -84,7 +80,8 @@ def manage_otp(
                 flash(f"invalid OTP. You have {otp_record.attempts_left} attempts left", "info")
                 return render_template(
                     "login.html",
-                    user=user
+                    user=user,
+                    otp_type=otp_type.lower()
                 )
 
 
