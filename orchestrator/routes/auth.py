@@ -10,7 +10,7 @@ from orchestrator.utilities.otps import manage_otp
 from orchestrator.utilities.email.templates import otp_email, verification_email 
 from datetime import datetime, timedelta
 from orchestrator.utilities.slugify_utils import slugify_object
-from orchestrator.utilities.user_login import log_in_user
+from orchestrator.utilities.user_login import log_in_user, authenticaticate_otp
 from orchestrator.utilities.forward_otp import handle_otp_forwarding
 from os import abort
 
@@ -69,25 +69,12 @@ def signup():  # add verification for signup
                     email=email
                 )
 
-                otp_forwarding = result[0]
+                otp_authentication = authenticaticate_otp(
+                    result=result,
+                    user=user
+                )
 
-                if otp_forwarding["success"]:
-                    flash(otp_forwarding.get("message"), "success")
-                    return redirect(
-                        url_for(
-                            "auth.otp_verification",
-                            slug=user.slug,
-                            otp_type=result[1]
-                        )
-                    )
-
-                else:
-                    flash(otp_forwarding.get("error"), "error")
-                    return redirect(
-                        url_for(
-                            "auth.signup"
-                        )
-                    )
+                
                     
             except Exception:
                 db.session.rollback()
@@ -156,11 +143,12 @@ def login():
             else:
 
                 if decisive_otp_type == "user-signup":
-                    log_in_user(user_object=user_object)
-
-
-            # if request.form.get("otp_type") is None:
-            #     print("otp non before otp")
+                    user_logged_in = log_in_user(
+                        user_object=user_object
+                    )
+                
+                    if user_logged_in is not None:
+                        return user_logged_in
 
             #else:
                 # generate OTP
