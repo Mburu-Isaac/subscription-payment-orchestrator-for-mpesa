@@ -18,8 +18,9 @@ def log_in_user(user_object):
 def authenticaticate_otp(result, user):
     
     otp_forwarding = result[0]
+    success = otp_forwarding["success"]
 
-    if otp_forwarding["success"]:
+    if success:
         flash(otp_forwarding.get("message"), "success")
         return redirect(
             url_for(
@@ -29,10 +30,12 @@ def authenticaticate_otp(result, user):
             )
         )
 
-    else:
+    if not success:
         flash(otp_forwarding.get("error"), "error")
         return redirect(
             url_for(
                 "auth.signup"
             )
         )
+
+    return None

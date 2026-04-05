@@ -6,6 +6,7 @@ from orchestrator.models import OTP
 from datetime import datetime, timezone
 from flask import render_template, flash, redirect, url_for
 from werkzeug.security import check_password_hash
+from .user_login import log_in_user
 
 load_dotenv()
 
@@ -58,10 +59,9 @@ def manage_otp(
                     )
                 ) 
 
-            # if otp_type == "Login-Verification":
-            #     return redirect(
-            #         url_for("main.index_page")
-            #     )
+            if otp_type.lower() == "two-factor-authentication":
+                user_logged_in = log_in_user(user_object=user)
+                return user_logged_in
 
             # if otp_type == "Manual-Transaction":
             #     pass

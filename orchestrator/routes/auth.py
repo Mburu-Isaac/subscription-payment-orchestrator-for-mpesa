@@ -74,8 +74,9 @@ def signup():  # add verification for signup
                     user=user
                 )
 
-                
-                    
+                if otp_authentication is not None:
+                    return otp_authentication
+
             except Exception:
                 db.session.rollback()
                 raise
@@ -105,6 +106,7 @@ def signup():  # add verification for signup
 def login():
 
     otp_type = request.args.get("otp_type")
+    email = request.form.get("email")
 
     if current_user.is_authenticated:
         return redirect(url_for("main.index_page"))
@@ -113,7 +115,7 @@ def login():
     if request.method == "POST":
 
         user_object = db.session.execute(
-            db.select(User).where(User.email == hash_email(request.form.get("email")))
+            db.select(User).where(User.email == hash_email(email=email))
         ).scalar()
 
         if not user_object:
@@ -150,16 +152,26 @@ def login():
                     if user_logged_in is not None:
                         return user_logged_in
 
-            #else:
-                # generate OTP
-                # authenticate OTP
-                # login user
+                else:
 
+                    otp_type = "Two Factor Authentication"
 
+                     # generate OTP
+                    result = handle_otp_forwarding(
+                        user=user_object,
+                        otp_type=otp_type,
+                        email=email
+                    )
 
-            # return redirect(
-            #     url_for("main.index_page")
-            # ) 
+                    # authenticate OTP
+                    otp_authentication = authenticaticate_otp(
+                        result=result,
+                        user=user_object
+                    )
+
+                    # login user
+                    if otp_authentication is not None:
+                        return otp_authentication
 
         except VerifyMismatchError:
             flash("wrong password. please try again", "info")
@@ -282,8 +294,14 @@ def otp_verification(slug, otp_type):
             ).scalars().first()
 
         if not otp_record:
-            flash("no otp found. request for a new one", "warning")
-            return render_template("email.html")
+            flash("Enter OTP to proceed", "info")
+            return redirect(
+                url_for(
+                    "auth.otp_verification",
+                    slug=user.slug,
+                    otp_type=otp_type
+                )
+            )
 
         else:
             return manage_otp(
@@ -292,13 +310,6 @@ def otp_verification(slug, otp_type):
                 user=user,
                 otp_type=otp_type
             )
-
-        # return redirect(
-        #     url_for(
-        #         "auth.account_recovery",
-        #         slug=user.slug
-        #     )
-        # )
 
     return render_template(
         "login.html",

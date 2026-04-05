@@ -18,4 +18,5 @@ def handle_otp_forwarding(
         ttl=timedelta(minutes=5)
     )
 
+
     return result, otp_type_slug
