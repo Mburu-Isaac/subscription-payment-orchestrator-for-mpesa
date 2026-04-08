@@ -259,6 +259,25 @@ def get_email():
             )
             return redirect(url_for("auth.get_mail"))
 
+        else:
+
+            otp_type = "Password Reset"
+
+            result = handle_otp_forwarding(
+                user=user,
+                otp_type=otp_type,
+                email=email
+            )
+
+            otp_authentication = authenticaticate_otp(
+                result=result,
+                user=user
+            )
+
+            if otp_authentication is not None:
+                return otp_authentication
+            
+
 
     return render_template("email.html")
 
