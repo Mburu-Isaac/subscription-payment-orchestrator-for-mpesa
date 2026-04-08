@@ -61,6 +61,9 @@ def signup():  # add verification for signup
                 db.session.add_all([user, password])
                 db.session.commit()
 
+                # Email verification Link
+
+                # OTP verification
                 otp_type = "User Signup"
 
                 result = handle_otp_forwarding(

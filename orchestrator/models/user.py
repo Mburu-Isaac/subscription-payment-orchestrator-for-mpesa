@@ -18,6 +18,7 @@ class User(db.Model, UserMixin):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(timezone.utc))
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     verification_status: Mapped[str] = mapped_column(String(30), default="unverified")
+    account_status: Mapped[str] = mapped_column(String(30), default="pending verification")
 
     # relationships
     subscriptions = db.relationship(
