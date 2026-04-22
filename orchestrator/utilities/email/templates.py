@@ -5,8 +5,19 @@ from orchestrator.extensions import db
 from werkzeug.security import generate_password_hash
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
+from config import Config
+from ..token_manager import TokenManager
 
 # combine sign up verification email with an OTP
+
+company_name = Config.COMPANY_NAME
+token_manager = TokenManager()
+
+def zonal_token_expiry(e_time):
+    return e_time.astimezone(ZoneInfo("Africa/Nairobi")).strftime("%H:%M EAT")
+
+# def zonal_token_expiry(etime, zone):
+    # return e_time.astimezone(ZoneInfo(f"{zone}")).stftime("%H:%M EAT")
 
 def otp_email(
     user,
@@ -33,7 +44,7 @@ def otp_email(
     expires_at = datetime.now(timezone.utc) + ttl
 
     # Kenyan timezone
-    kenyan_expiry = expires_at.astimezone(ZoneInfo("Africa/Nairobi"))
+    # kenyan_expiry = expires_at.astimezone(ZoneInfo("Africa/Nairobi"))
 
     otp_record = OTP(
         user_id=user.id,
@@ -65,7 +76,7 @@ def otp_email(
 
                             <p>
 
-                                This OTP code will expire at <strong> { kenyan_expiry.strftime("%H:%M EAT") } </strong>
+                                This OTP code will expire at <strong> { zonal_token_expiry(expires_at) } </strong>
 
                             </p>
 
@@ -74,7 +85,7 @@ def otp_email(
                             <p> 
                                 Regards, 
                                 <br>
-                                ETERNITY 
+                                {company_name} 
                             </p>
                     </body>
                     </html>
@@ -84,7 +95,8 @@ def otp_email(
             to_email=email,
             subject="OTP Verification",  # work with token type
             body=message,
-            html_body=html_body
+            html_body=html_body,
+            company_name=company_name
         )
 
         return {
@@ -114,7 +126,66 @@ def verification_email(
             # -> function sends verification link containing the token ->
                 # user clicks the link -> server verifies the token -> marks email as confirmed 
 
-    pass
+    token = token_manager.generate_access_token(user.id)
+    verification_token = token[0]
+    token_expiry = token[1]
+
+    verification_link = f"https://1867-102-204-88-88.ngrok-free.app/auth/signup?token={verification_token}"
+    subject = "Email Verification"
+
+    message = f"""
+        Use the following link to verify your email:
+
+        {verification_link}
+
+        This link will expire in 15 minutes.
+
+        regards,
+        {company_name}
+    """
+
+    html_body = f"""
+
+        <html>
+            <body>
+                <p>Click the button below to verify your email:</p>
+
+                <p>   
+                    <a href="{verification_link}"
+                    style="background-color:#4CAF50;
+                            color:white;
+                            padding:12px 20px;
+                            text-decoration:none;
+                            border-radius:5px;">
+                        Verify Email
+                    </a>
+                </p>
+
+                <p> This link expires at <strong> {zonal_token_expiry(token_expiry)}. </strong> </p>
+
+                <p>
+                    Regards,
+                    <br>
+                    {company_name}
+                </p>
+
+            </body>
+        </html>
+    """
+
+    send_company_email(
+        to_email=email,
+        subject=subject,
+        company_name=company_name,
+        body=message,
+        html_body=html_body
+    )
+
+    # return {
+    #     "success":True,
+    #     "message":"verification email sent successfully"
+    # }
+    return True
 
 
 def password_reset_email(email, reset_token):
@@ -144,7 +215,7 @@ def password_reset_email(email, reset_token):
         if you did not request this password reset, please ignore this email.
 
         Regards,
-        ETERNITY
+        {company_name}
     
     """
 
@@ -177,7 +248,7 @@ def password_reset_email(email, reset_token):
                 <p>
                     Regards,
                     <br>
-                    ETERNITY
+                    {company_name}
                 </p>
             </body>
         </html>
@@ -187,7 +258,8 @@ def password_reset_email(email, reset_token):
         to_email=email,
         subject=subject,
         body=message,
-        html_body=html_body
+        html_body=html_body,
+        company_name=company_name
     )
 
 

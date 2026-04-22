@@ -1,6 +1,5 @@
 from email.message import EmailMessage
 from dotenv import load_dotenv
-from config import Config
 import smtplib
 import os
 
@@ -11,6 +10,7 @@ def send_company_email(
     to_email,
     subject,
     body,
+    company_name,
     html_body=None
 ):
 
@@ -19,7 +19,7 @@ def send_company_email(
         company_email = os.getenv("COMPANY_EMAIL")
 
         msg = EmailMessage()
-        msg["From"] = f"{Config.COMPANY_NAME} <{company_email}>" 
+        msg["From"] = f"{company_name} <{company_email}>" 
         msg["To"] = to_email
         msg["Subject"] = subject
         msg.set_content(body)

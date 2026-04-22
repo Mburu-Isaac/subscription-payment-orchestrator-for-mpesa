@@ -14,7 +14,6 @@ from orchestrator.utilities.user_login import log_in_user, authenticaticate_otp
 from orchestrator.utilities.forward_otp import handle_otp_forwarding
 from os import abort
 
-
 bp = Blueprint("auth", __name__)
 
 @bp.route("/signup", methods=["GET", "POST"])
@@ -62,6 +61,11 @@ def signup():  # add verification for signup
                 db.session.commit()
 
                 # Email verification Link
+                if verification_email(
+                    email=email,
+                    user=user
+                ):
+                    print("email sent")
 
                 # OTP verification
                 otp_type = "User Signup"
@@ -345,3 +349,4 @@ def otp_verification(slug, otp_type):
 def logout():
     logout_user()
     return redirect(url_for("main.index_page"))
+
